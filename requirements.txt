@@ -1,0 +1,13 @@
+klepto
+shapely
+polyline
+pygsheets
+googlemaps
+ipykernel
+jupyter
+pandas
+autopep8
+python-zillow
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
