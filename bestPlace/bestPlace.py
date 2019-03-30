@@ -20,8 +20,17 @@ class location():
         self.gmaps = googlemaps.Client(key=self.api_key)
     
     def get_gps(self):
-        return(self.gmaps.geocode(self.address)[0]['geometry']['location'])
-        
+        self.address_gps_dict = self.gmaps.geocode(self.address)[0]['geometry']['location']
+        return(self.address_gps_dict)
+    
+    def nearest_public_transport(self,transportType):
+        gps_dict = self.get_gps()
+        self.public_transport = self.gmaps.places_nearby(location = (gps_dict['lat'],gps_dict['lng']),
+                                rank_by="distance",
+                                name=transportType)
+        return(self.public_transport)
+     
+            
          
 class district():
     def __init__(self,name):
