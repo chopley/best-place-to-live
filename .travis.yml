@@ -3,10 +3,12 @@ python:
   - "3.6"
 install:
   - pip install -r requirements.txt
+  - pip install pytest
   - pip install coverage
   - pip install python-coveralls
+  - pip install pytest-cov
 script:
-- pytest
+- pytest --cov=bestPlaces/
 after_success: 
 - coverage report
 - coveralls
