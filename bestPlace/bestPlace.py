@@ -9,8 +9,10 @@ from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 import xmltodict
 import pprint
+import requests_cache
 
 class location():
+    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=180)
     def __init__(self,address,type):
         self.address = address
         self.type = type
