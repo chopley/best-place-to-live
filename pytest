@@ -1,1 +1,1 @@
-coverage run -m unittest discover tests
+coverage run -m --source bestPlace unittest discover tests
