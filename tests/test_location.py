@@ -3,9 +3,9 @@ from bestPlace.bestPlace import location
  
 
 
-class LocationTest(TestCase):
+class LocationTest_Katonah(TestCase):
     def setUp(self):
-        self.loc = location('7 Orchard Ln, Katonah','house')
+        self.loc = location('7 Orchard Ln, Katonah','ny','house')
  
     def test_get_gps(self):
         a = self.loc.get_gps()
@@ -22,6 +22,37 @@ class LocationTest(TestCase):
         transport_type = 'Bus Station'
         b = self.loc.nearest_public_transport(transport_type)
         self.assertEqual(b['results'][0]['name'], 'Bedford Rd @ Congdon La')
+        
+    def test_get_school_district(self):
+        a = self.loc.get_gps()
+        a = self.loc.get_school_district()
+        self.assertEqual(a['districtList'][0]['districtName'],'Katonah-Lewisboro Union Free School District')
+
+class LocationTest_Stamford(TestCase):
+    def setUp(self):
+        self.loc = location('47 Parry Rd, Stamford','ct','house')
+ 
+    def test_get_gps(self):
+        a = self.loc.get_gps()
+        self.assertEqual(a, {'lat': 41.1158569, 'lng': -73.5259389})
+        
+    def test_nearest_public_transport_train(self):
+        a = self.loc.get_gps()
+        transport_type = 'Train Station'
+        b = self.loc.nearest_public_transport(transport_type)
+        self.assertEqual(b['results'][0]['name'], 'Talmadge Hill')
+        
+    def test_nearest_public_transport_bus(self):
+        a = self.loc.get_gps()
+        transport_type = 'Bus Station'
+        b = self.loc.nearest_public_transport(transport_type)
+        self.assertEqual(b['results'][0]['name'], 'High Ridge Park and High Ridge Park Shelter')
+        
+    def test_get_school_district(self):
+        a = self.loc.get_gps()
+        a = self.loc.get_school_district()
+        self.assertEqual(a['districtList'][0]['districtName'],'Stamford School District')
+
 
         
        
