@@ -10,6 +10,25 @@ from shapely.geometry.polygon import Polygon
 import xmltodict
 import pprint
 
+class location():
+    def __init__(self,address,type):
+        self.address = address
+        self.type = type
+        self.api_key = os.environ.get('GOOGLE_API')
+        self.gmaps = googlemaps.Client(key=self.api_key)
+    
+    def get_gps(self):
+        return(self.gmaps.geocode(self.address)[0]['geometry']['location'])
+        
+         
+class district():
+    def __init__(self,name):
+        self.name = name
+        self.type = type
+
+
+
+    
 class placesToLive():
     
     def __init__(self,address_list,destination):
