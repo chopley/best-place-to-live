@@ -13,10 +13,13 @@ import requests_cache
 
 class location():
     requests_cache.install_cache('api_cache', backend='sqlite', expire_after=180)
-    def __init__(self,address,type):
+    def __init__(self,address,state,type):
         self.address = address
+        self.state = state
         self.type = type
         self.api_key = os.environ.get('GOOGLE_API')
+        self.school_digger_appID = os.environ.get('SCHOOLDIGGER_APPID')
+        self.school_digger_appKey = os.environ.get('SCHOOLDIGGER_APPKEY')
         self.gmaps = googlemaps.Client(key=self.api_key)
     
     def get_gps(self):
@@ -29,6 +32,14 @@ class location():
                                 rank_by="distance",
                                 name=transportType)
         return(self.public_transport)
+    
+    def get_school_district(self):
+        gps_dict = self.get_gps()
+        url = "https://api.schooldigger.com/v1.1/districts"
+        headers = {"Accept": "application/json"}
+        payload = {'st': self.state, 'nearLatitude': gps_dict['lat'],'nearLongitude': gps_dict['lng'],'isInBoundaryOnly':'true','appID':self.school_digger_appID,'appKey': self.school_digger_appKey}
+        r = requests.get(url, headers=headers,params=payload)
+        return(r.json())
      
             
          
