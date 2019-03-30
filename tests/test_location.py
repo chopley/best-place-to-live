@@ -84,6 +84,11 @@ class LocationTest_Stamford(TestCase):
                              'distance': '3.0 mi', 
                              'duration': 7}
         self.assertEqual(distance[0],expected_response)
+    
+    def test_convert_google_duration_to_minutes(self):
+        google_time = '1 day 3 hours 27 minutes'
+        converted = self.loc.convert_google_duration_to_minutes(google_time)
+        self.assertEqual(converted,1647)
         
 if __name__ == '__main__':
     unittest.main()

@@ -93,11 +93,7 @@ class location():
         else:
             train_duration_minutes = vals[0]
         return(train_duration_minutes)
-          
-class district():
-    def __init__(self,name):
-        self.name = name
-        self.type = type
+
 
 
 
