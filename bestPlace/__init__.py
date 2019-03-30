@@ -1,0 +1,1 @@
+from bestPlace.bestPlace import location
