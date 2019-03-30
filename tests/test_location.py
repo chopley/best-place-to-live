@@ -42,7 +42,6 @@ class LocationTest_Katonah(TestCase):
         mode = 'driving'
         nOpts = 5
         distance = self.loc.distance_to_public_transport(transportType,mode,nOpts)
-        print(distance)
         expected_response = {'house_location': (41.250645, -73.6845249), 'station_location': (41.2595633, -73.6839658), 'distance': '0.8 mi', 'duration': 4}
         self.assertEqual(distance[0],expected_response)
         
@@ -85,6 +84,9 @@ class LocationTest_Stamford(TestCase):
                              'distance': '3.0 mi', 
                              'duration': 7}
         self.assertEqual(distance[0],expected_response)
+        
+if __name__ == '__main__':
+    unittest.main()
 
 
         
