@@ -1,5 +1,6 @@
 from unittest import TestCase
 from bestPlace.bestPlace import location
+import datetime
  
 
 
@@ -27,6 +28,27 @@ class LocationTest_Katonah(TestCase):
         a = self.loc.get_gps()
         a = self.loc.get_school_district()
         self.assertEqual(a['districtList'][0]['districtName'],'Katonah-Lewisboro Union Free School District')
+        
+    def test_distance_to_public_transport_walking(self):
+        transportType = 'Train Station'
+        mode = 'walking'
+        nOpts = 5
+        distance = self.loc.distance_to_public_transport(transportType,mode,nOpts)
+        expected_response = {'house_location': (41.250645, -73.6845249), 'station_location': (41.2595633, -73.6839658), 'distance': '0.7 mi', 'duration': 14}
+        self.assertEqual(distance[0],expected_response)
+        
+    def test_distance_to_public_transport_driving(self):
+        transportType = 'Train Station'
+        mode = 'driving'
+        nOpts = 5
+        distance = self.loc.distance_to_public_transport(transportType,mode,nOpts)
+        print(distance)
+        expected_response = {'house_location': (41.250645, -73.6845249), 'station_location': (41.2595633, -73.6839658), 'distance': '0.8 mi', 'duration': 4}
+        self.assertEqual(distance[0],expected_response)
+        
+    def test_get_time_of_travel(self):
+        self.time_of_travel = self.loc.get_time_of_travel('07:00',datetime.date.today(),1)
+        return(self.time_of_travel)
 
 class LocationTest_Stamford(TestCase):
     def setUp(self):
@@ -52,6 +74,17 @@ class LocationTest_Stamford(TestCase):
         a = self.loc.get_gps()
         a = self.loc.get_school_district()
         self.assertEqual(a['districtList'][0]['districtName'],'Stamford School District')
+        
+    def test_distance_to_public_transport_driving(self):
+        transportType = 'Train Station'
+        mode = 'driving'
+        nOpts = 5
+        distance = self.loc.distance_to_public_transport(transportType,mode,nOpts)
+        expected_response = {'house_location': (41.1158569, -73.5259389), 
+                             'station_location': (41.116012, -73.498149), 
+                             'distance': '3.0 mi', 
+                             'duration': 7}
+        self.assertEqual(distance[0],expected_response)
 
 
         
