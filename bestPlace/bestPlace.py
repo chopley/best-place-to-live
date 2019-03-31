@@ -37,27 +37,20 @@ class location():
         gps_dict = self.get_gps()
         public_transport = self.nearest_public_transport(transportType)
         station_distance = []
-        try:
-            for station in public_transport['results'][0:nOpts]:
-                if('geometry' in station.keys() ):
-                    dd = self.gmaps.directions((gps_dict['lat'],gps_dict['lng']),
-                                     (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
-                                     mode=mode,
-                                     departure_time=datetime.datetime(2019, 4, 28, 7, 0))
-                    distance = (dd[0]['legs'][0]['distance']['text'])
-                    duration = (dd[0]['legs'][0]['duration']['text'])
-                    distance = {"house_location" : (gps_dict['lat'],gps_dict['lng']),
-                                "station_location" : (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
-                                "distance" : distance,
-                                "duration" : self.convert_google_duration_to_minutes(duration)
-                                }
-                    station_distance.append(distance)
-                else:
-                    print('breaking')
-                    break
-        except TypeError:
-            print('typeerror')
-        
+        for station in public_transport['results'][0:nOpts]:
+            dd = self.gmaps.directions((gps_dict['lat'],gps_dict['lng']),
+                             (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
+                             mode=mode,
+                             departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+            distance = (dd[0]['legs'][0]['distance']['text'])
+            duration = (dd[0]['legs'][0]['duration']['text'])
+            distance = {"house_location" : (gps_dict['lat'],gps_dict['lng']),
+                        "station_location" : (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
+                        "distance" : distance,
+                        "duration" : self.convert_google_duration_to_minutes(duration)
+                        }
+            station_distance.append(distance)
+ 
         return(station_distance)
                 
     
