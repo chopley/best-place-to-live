@@ -1,12 +1,22 @@
 from unittest import TestCase
 from bestPlace.bestPlace import location
 import datetime
+import csv
  
 
 
 class LocationTest_Katonah(TestCase):
     def setUp(self):
-        self.loc = location('7 Orchard Ln, Katonah','ny','house')
+        address = []
+        state = []
+        type = []
+        with open('./tests/test_data.csv') as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=';')
+            for row in readCSV:
+                address.append(row[0])
+                state.append(row[1])
+                type.append(row[2])
+        self.loc = location(address[0],state[0],type[0])
  
     def test_get_gps(self):
         a = self.loc.get_gps()
@@ -50,8 +60,18 @@ class LocationTest_Katonah(TestCase):
         return(self.time_of_travel)
 
 class LocationTest_Stamford(TestCase):
-    def setUp(self):
-        self.loc = location('47 Parry Rd, Stamford','ct','house')
+    def setUp(self):  
+        address = []
+        state = []
+        type = []    
+        with open('./tests/test_data.csv') as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=';')
+            for row in readCSV:
+                address.append(row[0])
+                state.append(row[1])
+                type.append(row[2])
+        self.loc = location(address[1],state[1],type[1])
+
  
     def test_get_gps(self):
         a = self.loc.get_gps()

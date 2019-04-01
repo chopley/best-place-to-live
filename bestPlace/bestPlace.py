@@ -12,8 +12,10 @@ import pprint
 import requests_cache
 
 class location():
-    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=600)
+    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=3600)
     def __init__(self,address,state,type):
+        """
+        """
         self.address = address
         self.state = state
         self.type = type
@@ -23,10 +25,14 @@ class location():
         self.gmaps = googlemaps.Client(key=self.api_key)
     
     def get_gps(self):
+        """
+        """
         self.address_gps_dict = self.gmaps.geocode(self.address)[0]['geometry']['location']
         return(self.address_gps_dict)
     
     def nearest_public_transport(self,transportType):
+        """
+        """
         gps_dict = self.get_gps()
         self.public_transport = self.gmaps.places_nearby(location = (gps_dict['lat'],gps_dict['lng']),
                                 rank_by="distance",
@@ -34,6 +40,8 @@ class location():
         return(self.public_transport)
     
     def distance_to_public_transport(self,transportType,mode,nOpts):
+        """
+        """
         gps_dict = self.get_gps()
         public_transport = self.nearest_public_transport(transportType)
         station_distance = []
@@ -50,11 +58,12 @@ class location():
                         "duration" : self.convert_google_duration_to_minutes(duration)
                         }
             station_distance.append(distance)
- 
         return(station_distance)
                 
     
     def get_school_district(self):
+        """
+        """
         gps_dict = self.get_gps()
         url = "https://api.schooldigger.com/v1.1/districts"
         headers = {"Accept": "application/json"}
@@ -67,8 +76,8 @@ class location():
                    day_of_week):
         """
         get a datetime of travel based on today's date and choosing the date for the following day of week
-        datetime_today = datetime.date.today()
         time of day e.g. 07:00
+        datetime_today = datetime.date.today()
         day of week e.g. 1= Monday, 2= Tuesday etc.
         """
     
@@ -78,6 +87,8 @@ class location():
         return(time_of_travel)
     
     def convert_google_duration_to_minutes(self,string):
+        """
+        """
         vals = [int(s) for s in string.split() if s.isdigit()]
         if(len(vals)==3): #days+hours+minutes
             train_duration_minutes = vals[0]*24*60+vals[1]*60+vals[2]
