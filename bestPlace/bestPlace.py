@@ -4,7 +4,6 @@ import zillow
 import requests
 import pandas as pd
 import pickle,polyline
-import klepto
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 import xmltodict
@@ -15,34 +14,36 @@ import csv
 class helperFunctions():
         
     def read_address_csv(self,fileName):
-        address = []
-        state = []
-        type = []
-        zip = []
-        with open(fileName) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=';')
-            for row in readCSV:
-                address.append(row[0])
-                state.append(row[1])
-                type.append(row[2])
-                zip.append(row[3])
-        return(address,state,type,zip)
+        houses = pd.read_csv(fileName,delimiter=';')
+        return(houses)
 
 class location():
-    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=3600)
-    def __init__(self,address,state,type,zip):
+    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=7200)
+    def __init__(self,address,state,type,zip,filename_other_places_of_importance):
         """
         """
         self.address = address
         self.state = state
         self.type = type
         self.zip= zip
+        self.station_distance = []
         self.api_key = os.environ.get('GOOGLE_API')
         self.school_digger_appID = os.environ.get('SCHOOLDIGGER_APPID')
         self.school_digger_appKey = os.environ.get('SCHOOLDIGGER_APPKEY')
         self.zillow_key = os.environ.get('ZILLOW_API')
         self.gmaps = googlemaps.Client(key=self.api_key)
+        self.update_distances_to_places_of_importance(filename_other_places_of_importance,'driving')
+        self.distance_to_public_transport(self.address,'Train Station','driving',5)
     
+    def update_distances_to_places_of_importance(self,filename,transportMode):
+        self.distances = []
+        destinations = pd.read_csv(filename,delimiter=';')
+        for index, row in destinations.iterrows():
+            dict_address = {'address' : row['address']}
+            dict_destination = self.distance_to_other_places_of_importance(self.address,row['address'],transportMode)
+            self.distances.append(dict_destination)
+        return(self.distances)
+             
     def get_gps(self,address):
         """
         """
@@ -61,10 +62,11 @@ class location():
                  (gps_dict_destination['lat'],gps_dict_destination['lng']),
                  mode=transportMode,
                  departure_time=datetime.datetime(2019, 4, 28, 7, 0))
-        return(self.convert_directions_to_distance_duration(directions))
+        directions = self.convert_directions_to_distance_duration(directions)
+        mode = {'transportMode' : transportMode, 'destination' : destination_address}
+        directions.update(mode)
+        return(directions)
 
-        
-    
     def nearest_public_transport(self,gps_dict,transportType):
         """
         """
@@ -89,9 +91,11 @@ class location():
             distance = {"house_location" : (gps_dict['lat'],gps_dict['lng']),
                         "station_location" : (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
                         "distance" : distance,
-                        "duration" : self.convert_google_duration_to_minutes(duration)
+                        "duration" : self.convert_google_duration_to_minutes(duration),
+                        "station_name" : (station['name'])
                         }
             station_distance.append(distance)
+        self.station_distance.append(station_distance)
         return(station_distance)
                 
     

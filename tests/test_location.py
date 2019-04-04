@@ -9,8 +9,12 @@ import datetime
 class LocationTest_Katonah(TestCase):
     def setUp(self):
         helper = helperFunctions()
-        (address,state,type,zip) = helper.read_address_csv('./tests/test_data.csv')
-        self.loc = location(address[0],state[0],type[0],zip[0])
+        location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
+        self.loc = location(location_addresses['address'][0],
+                            location_addresses['state'][0],
+                            location_addresses['locationType'][0],
+                            location_addresses['zip'][0],
+                            './tests/test_data_places_of_importance.csv')
  
     def test_get_gps(self):
         a = self.loc.get_gps(self.loc.address)
@@ -38,7 +42,11 @@ class LocationTest_Katonah(TestCase):
         mode = 'walking'
         nOpts = 5
         distance = self.loc.distance_to_public_transport(self.loc.address,transportType,mode,nOpts)
-        expected_response = {'house_location': (41.250645, -73.6845249), 'station_location': (41.2595633, -73.6839658), 'distance': '0.7 mi', 'duration': 14}
+        expected_response = {'house_location': (41.250645, -73.6845249), 
+                             'station_location': (41.2595633, -73.6839658), 
+                             'distance': '0.7 mi', 
+                             'duration': 14,
+                             'station_name': 'Katonah'}
         self.assertEqual(distance[0],expected_response)
         
     def test_distance_to_public_transport_driving(self):
@@ -46,7 +54,11 @@ class LocationTest_Katonah(TestCase):
         mode = 'driving'
         nOpts = 5
         distance = self.loc.distance_to_public_transport(self.loc.address,transportType,mode,nOpts)
-        expected_response = {'house_location': (41.250645, -73.6845249), 'station_location': (41.2595633, -73.6839658), 'distance': '0.8 mi', 'duration': 4}
+        expected_response = {'house_location': (41.250645, -73.6845249), 
+                             'station_location': (41.2595633, -73.6839658), 
+                             'distance': '0.8 mi', 
+                             'duration': 4,
+                             'station_name': 'Katonah'}
         self.assertEqual(distance[0],expected_response)
         
     def test_get_time_of_travel(self):
@@ -66,8 +78,16 @@ class LocationTest_Katonah(TestCase):
 class LocationTest_Stamford(TestCase):
     def setUp(self):  
         helper = helperFunctions()
-        (address,state,type,zip) = helper.read_address_csv('./tests/test_data.csv')         
-        self.loc = location(address[1],state[1],type[1],zip[1])
+        location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
+        self.loc = location(location_addresses['address'][1],
+                    location_addresses['state'][1],
+                    location_addresses['locationType'][1],
+                    location_addresses['zip'][1],
+                    './tests/test_data_places_of_importance.csv')         
+
+    def test_update_distances_to_places_of_importance(self):
+        distances = self.loc.update_distances_to_places_of_importance('./tests/test_data_places_of_importance.csv','driving')
+        self.assertEqual(distances[1]['distance'], '63.9 mi')
  
     def test_get_gps(self):
         a = self.loc.get_gps(self.loc.address)
@@ -102,7 +122,9 @@ class LocationTest_Stamford(TestCase):
         expected_response = {'house_location': (41.1158569, -73.5259389), 
                              'station_location': (41.116012, -73.498149), 
                              'distance': '3.0 mi', 
-                             'duration': 7}
+                             'duration': 7,
+                             'station_name' : 'Talmadge Hill'
+                             }
         self.assertEqual(distance[0],expected_response)
     
     def test_convert_google_duration_to_minutes(self):
