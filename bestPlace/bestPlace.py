@@ -19,7 +19,7 @@ class helperFunctions():
 
 class location():
     requests_cache.install_cache('api_cache', backend='sqlite', expire_after=7200)
-    def __init__(self,address,state,type,zip,filename_other_places_of_importance):
+    def __init__(self,address,state,type,zip,filename_other_places_of_importance,filename_commuting_stations):
         """
         """
         self.address = address
@@ -27,22 +27,32 @@ class location():
         self.type = type
         self.zip= zip
         self.station_distance = []
+        self.distances = []
+        self.transit_distance = []
+        self.filename_commuting_stations = filename_commuting_stations
         self.api_key = os.environ.get('GOOGLE_API')
         self.school_digger_appID = os.environ.get('SCHOOLDIGGER_APPID')
         self.school_digger_appKey = os.environ.get('SCHOOLDIGGER_APPKEY')
         self.zillow_key = os.environ.get('ZILLOW_API')
         self.gmaps = googlemaps.Client(key=self.api_key)
-        self.update_distances_to_places_of_importance(filename_other_places_of_importance,'driving')
-        self.distance_to_public_transport(self.address,'Train Station','driving',5)
+        
+        #populate object attributes
+        self.distances.append(self.update_distances_to_places_of_importance(filename_other_places_of_importance,'driving'))
+        self.station_distance.append(self.distance_to_public_transport(self.address,'Train Station','driving',5))
+        self.station_distance.append(self.distance_to_public_transport(self.address,'Train Station','walking',5))
+        self.station_distance.append(self.distance_to_public_transport(self.address,'Subway Station','driving',5))
+        self.transit_distance.append(self.get_all_transit_times(self.filename_commuting_stations))
+        self.school_district_data = self.get_school_district_data(self.get_school_district()['districtList'][0]['districtID'])
+
     
     def update_distances_to_places_of_importance(self,filename,transportMode):
-        self.distances = []
+        distances = []
         destinations = pd.read_csv(filename,delimiter=';')
         for index, row in destinations.iterrows():
             dict_address = {'address' : row['address']}
             dict_destination = self.distance_to_other_places_of_importance(self.address,row['address'],transportMode)
-            self.distances.append(dict_destination)
-        return(self.distances)
+            distances.append(dict_destination)
+        return(distances)
              
     def get_gps(self,address):
         """
@@ -53,7 +63,7 @@ class location():
     def convert_directions_to_distance_duration(self,directions):
         distance = (directions[0]['legs'][0]['distance']['text'])
         duration = (directions[0]['legs'][0]['duration']['text'])
-        return({'distance' : distance, 'duration' : duration})
+        return({'distance' : distance, 'duration' : self.convert_google_duration_to_minutes(duration)})
     
     def distance_to_other_places_of_importance(self,start_location_address,destination_address,transportMode):
         gps_dict_start = self.get_gps(start_location_address)
@@ -63,7 +73,36 @@ class location():
                  mode=transportMode,
                  departure_time=datetime.datetime(2019, 4, 28, 7, 0))
         directions = self.convert_directions_to_distance_duration(directions)
-        mode = {'transportMode' : transportMode, 'destination' : destination_address}
+        mode = {'transportMode' : transportMode, 'destination' : destination_address ,'destination_location' : (gps_dict_destination['lat'],gps_dict_destination['lng']) }
+        directions.update(mode)
+        return(directions)
+    
+    def get_all_transit_times(self,commuting_destinations_station_filename):
+        transit_destination_stations = pd.read_csv(commuting_destinations_station_filename,delimiter=';')
+        distances = []
+        for stations in self.station_distance:
+            for station in stations:
+                for index, row in transit_destination_stations.iterrows():
+                    dict_start_station = {'station_name' : station['station_name'],'station_location' : station['station_location'], 'transportType' : station['transportType']}
+                    distance = self.distance_on_public_transport(station['station_location'],row['address'])
+                    dict_start_station.update(distance)
+                    distances.append(dict_start_station)            
+        return(distances)
+        #transit_originating_stations = self.station_distance
+        #transit_distances = []
+        #for index, row in transit_stations.iterrows():
+        #    distance = distance_on_public_transport()
+            
+    
+    def distance_on_public_transport(self,start_station_location,destination_station_address):
+        transportMode = 'transit'
+        gps_dict_destination = self.get_gps(destination_station_address)
+        directions = self.gmaps.directions(start_station_location,
+                 (gps_dict_destination['lat'],gps_dict_destination['lng']),
+                 mode=transportMode,
+                 departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+        directions = self.convert_directions_to_distance_duration(directions)
+        mode = {'transportMode' : transportMode, 'destination' : destination_station_address ,'destination_location' : (gps_dict_destination['lat'],gps_dict_destination['lng']) }
         directions.update(mode)
         return(directions)
 
@@ -92,10 +131,11 @@ class location():
                         "station_location" : (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
                         "distance" : distance,
                         "duration" : self.convert_google_duration_to_minutes(duration),
-                        "station_name" : (station['name'])
+                        "station_name" : (station['name']),
+                        "transportMode" : mode,
+                        "transportType" : transportType
                         }
             station_distance.append(distance)
-        self.station_distance.append(station_distance)
         return(station_distance)
                 
     

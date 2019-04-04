@@ -14,7 +14,8 @@ class LocationTest_Katonah(TestCase):
                             location_addresses['state'][0],
                             location_addresses['locationType'][0],
                             location_addresses['zip'][0],
-                            './tests/test_data_places_of_importance.csv')
+                            './tests/test_data_places_of_importance.csv',
+                            './tests/test_data_commuting_stations.csv')
  
     def test_get_gps(self):
         a = self.loc.get_gps(self.loc.address)
@@ -31,6 +32,10 @@ class LocationTest_Katonah(TestCase):
         transport_type = 'Bus Station'
         b = self.loc.nearest_public_transport(gps_dict,transport_type)
         self.assertEqual(b['results'][0]['name'], 'Bedford Rd @ Congdon La')
+    
+    def test_get_transit_times(self):
+        a = self.loc.get_all_transit_times(self.loc.filename_commuting_stations)
+
         
     def test_get_school_district(self):
         a = self.loc.get_gps(self.loc.address)
@@ -46,7 +51,9 @@ class LocationTest_Katonah(TestCase):
                              'station_location': (41.2595633, -73.6839658), 
                              'distance': '0.7 mi', 
                              'duration': 14,
-                             'station_name': 'Katonah'}
+                             'station_name': 'Katonah',
+                             'transportMode': 'walking',
+                             'transportType': transportType}
         self.assertEqual(distance[0],expected_response)
         
     def test_distance_to_public_transport_driving(self):
@@ -58,7 +65,9 @@ class LocationTest_Katonah(TestCase):
                              'station_location': (41.2595633, -73.6839658), 
                              'distance': '0.8 mi', 
                              'duration': 4,
-                             'station_name': 'Katonah'}
+                             'station_name': 'Katonah',
+                             'transportMode': 'driving',
+                             'transportType': transportType}
         self.assertEqual(distance[0],expected_response)
         
     def test_get_time_of_travel(self):
@@ -83,7 +92,8 @@ class LocationTest_Stamford(TestCase):
                     location_addresses['state'][1],
                     location_addresses['locationType'][1],
                     location_addresses['zip'][1],
-                    './tests/test_data_places_of_importance.csv')         
+                    './tests/test_data_places_of_importance.csv',
+                    './tests/test_data_commuting_stations.csv')         
 
     def test_update_distances_to_places_of_importance(self):
         distances = self.loc.update_distances_to_places_of_importance('./tests/test_data_places_of_importance.csv','driving')
@@ -123,7 +133,9 @@ class LocationTest_Stamford(TestCase):
                              'station_location': (41.116012, -73.498149), 
                              'distance': '3.0 mi', 
                              'duration': 7,
-                             'station_name' : 'Talmadge Hill'
+                             'station_name' : 'Talmadge Hill',
+                             'transportMode': 'driving',
+                             'transportType': transportType
                              }
         self.assertEqual(distance[0],expected_response)
     
