@@ -10,6 +10,23 @@ from shapely.geometry.polygon import Polygon
 import xmltodict
 import pprint
 import requests_cache
+import csv
+
+class helperFunctions():
+        
+    def read_address_csv(self,fileName):
+        address = []
+        state = []
+        type = []
+        zip = []
+        with open(fileName) as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=';')
+            for row in readCSV:
+                address.append(row[0])
+                state.append(row[1])
+                type.append(row[2])
+                zip.append(row[3])
+        return(address,state,type,zip)
 
 class location():
     requests_cache.install_cache('api_cache', backend='sqlite', expire_after=3600)
@@ -31,6 +48,22 @@ class location():
         """
         self.address_gps_dict = self.gmaps.geocode(address)[0]['geometry']['location']
         return(self.address_gps_dict)
+    
+    def convert_directions_to_distance_duration(self,directions):
+        distance = (directions[0]['legs'][0]['distance']['text'])
+        duration = (directions[0]['legs'][0]['duration']['text'])
+        return({'distance' : distance, 'duration' : duration})
+    
+    def distance_to_other_places_of_importance(self,start_location_address,destination_address,transportMode):
+        gps_dict_start = self.get_gps(start_location_address)
+        gps_dict_destination = self.get_gps(destination_address)
+        directions = self.gmaps.directions((gps_dict_start['lat'],gps_dict_start['lng']),
+                 (gps_dict_destination['lat'],gps_dict_destination['lng']),
+                 mode=transportMode,
+                 departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+        return(self.convert_directions_to_distance_duration(directions))
+
+        
     
     def nearest_public_transport(self,gps_dict,transportType):
         """

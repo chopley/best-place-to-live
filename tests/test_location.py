@@ -1,23 +1,15 @@
 from unittest import TestCase
 from bestPlace.bestPlace import location
+from bestPlace.bestPlace import helperFunctions
 import datetime
-import csv
+
  
 
 
 class LocationTest_Katonah(TestCase):
     def setUp(self):
-        address = []
-        state = []
-        type = []
-        zip = []
-        with open('./tests/test_data.csv') as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=';')
-            for row in readCSV:
-                address.append(row[0])
-                state.append(row[1])
-                type.append(row[2])
-                zip.append(row[3])
+        helper = helperFunctions()
+        (address,state,type,zip) = helper.read_address_csv('./tests/test_data.csv')
         self.loc = location(address[0],state[0],type[0],zip[0])
  
     def test_get_gps(self):
@@ -73,23 +65,17 @@ class LocationTest_Katonah(TestCase):
 
 class LocationTest_Stamford(TestCase):
     def setUp(self):  
-        address = []
-        state = []
-        type = []    
-        zip = []
-        with open('./tests/test_data.csv') as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=';')
-            for row in readCSV:
-                address.append(row[0])
-                state.append(row[1])
-                type.append(row[2])
-                zip.append(row[3])               
+        helper = helperFunctions()
+        (address,state,type,zip) = helper.read_address_csv('./tests/test_data.csv')         
         self.loc = location(address[1],state[1],type[1],zip[1])
-
  
     def test_get_gps(self):
         a = self.loc.get_gps(self.loc.address)
         self.assertEqual(a, {'lat': 41.1158569, 'lng': -73.5259389})
+        
+    def test_distance_to_other_places_of_importance(self):
+        trip_test = self.loc.distance_to_other_places_of_importance(self.loc.address,'5 Quail Run Road, Woodbury, CT','driving')
+        self.assertEqual(trip_test['distance'], '48.7 mi')
         
     def test_nearest_public_transport_train(self):
         gps_dict = self.loc.get_gps(self.loc.address)
