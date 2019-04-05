@@ -35,7 +35,7 @@ class LocationTest_Katonah(TestCase):
     
     def test_get_transit_times(self):
         a = self.loc.get_all_transit_times(self.loc.filename_commuting_stations)
-
+        
         
     def test_get_school_district(self):
         a = self.loc.get_gps(self.loc.address)
@@ -83,6 +83,18 @@ class LocationTest_Katonah(TestCase):
     def test_get_zillow_data(self):
         self.loc.get_zillow_data()
 
+
+class HelperTest(TestCase):
+    def setUp(self):
+        self.helper = helperFunctions()
+
+    def test_switch_lat_long(self):
+        a = [(1,2),(3,4)]
+        b = [(2,1),(4,3)]
+        c = self.helper.switch_lat_long(a)
+        self.assertEqual(c,b)
+
+        
 
 class LocationTest_Stamford(TestCase):
     def setUp(self):  

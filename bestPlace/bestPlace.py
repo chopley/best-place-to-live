@@ -10,15 +10,22 @@ import xmltodict
 import pprint
 import requests_cache
 import csv
+import polyline
 
 class helperFunctions():
         
     def read_address_csv(self,fileName):
         houses = pd.read_csv(fileName,delimiter=';')
         return(houses)
+    
+    def switch_lat_long(self,list_of_coords):
+        return_list_of_coords = []
+        for coord in list_of_coords:
+           return_list_of_coords.append((coord[1],coord[0]))
+        return(return_list_of_coords)
 
 class location():
-    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=7200)
+    requests_cache.install_cache('api_cache', backend='sqlite', expire_after=72000)
     def __init__(self,address,state,type,zip,filename_other_places_of_importance,filename_commuting_stations):
         """
         """
@@ -36,6 +43,9 @@ class location():
         self.zillow_key = os.environ.get('ZILLOW_API')
         self.gmaps = googlemaps.Client(key=self.api_key)
         
+        #populate various other useful attributes
+        self.address_gps = self.get_gps(self.address)
+        
         #populate object attributes
         self.distances.append(self.update_distances_to_places_of_importance(filename_other_places_of_importance,'driving'))
         self.station_distance.append(self.distance_to_public_transport(self.address,'Train Station','driving',5))
@@ -43,8 +53,39 @@ class location():
         self.station_distance.append(self.distance_to_public_transport(self.address,'Subway Station','driving',5))
         self.transit_distance.append(self.get_all_transit_times(self.filename_commuting_stations))
         self.school_district_data = self.get_school_district_data(self.get_school_district()['districtList'][0]['districtID'])
+        self.decode_polylines()
+        self.update_dataframes()
+        
 
+    def update_dataframes(self):
+        to_station = []
+        for station_distance in self.station_distance:
+            to_station = to_station + station_distance
+        self.df_station_distance = pd.DataFrame(to_station)  
+        self.df_travel_distances = self.df_station_distance.merge(pd.DataFrame(self.transit_distance[0]),left_on = 'station_location',right_on = 'station_location')
+        self.df_travel_distances['total_duration'] = self.df_travel_distances['duration_x'] + self.df_travel_distances['duration_y']
+        self.df_travel_distances = self.df_travel_distances[['distance_x','duration_x','station_name_x','transportMode_x','transportType_x','destination','total_duration']].sort_values('total_duration')
+        self.df_travel_aggregate = self.df_travel_distances.groupby(['destination','duration_x','transportMode_x']).agg({'total_duration':['min','max'],
+                                                                                                         'duration_x':['min','max']
+                                                                                                        })
+        self.decode_polylines()
+        self.df_places_of_importance = pd.DataFrame(self.distances[0])
+        
+        self.df_places_of_importance['HouseAddress'] = self.address
+        self.df_travel_distances['HouseAddress'] = self.address
+        self.df_station_distance['HouseAddress'] = self.address
+        
+        maximum_distance_to_station = 50
+        self.df_travel_minimums = self.df_travel_distances[self.df_travel_distances['duration_x']<maximum_distance_to_station].groupby(['HouseAddress','destination']).min().reset_index()[['HouseAddress','station_name_x','duration_x','destination','total_duration']]
     
+    def decode_polylines(self):
+        plines = []
+        for pline in self.school_district_data['boundary']['polylineCollection']:  
+            plines.append(polyline.decode(pline['polylineOverlayEncodedPoints']))
+        self.school_district_polylines = plines
+        return(plines)
+        
+        
     def update_distances_to_places_of_importance(self,filename,transportMode):
         distances = []
         destinations = pd.read_csv(filename,delimiter=';')

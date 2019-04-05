@@ -1,3 +1,6 @@
+geopandas
+geojson
+folium
 coverage
 requests-cache
 klepto
