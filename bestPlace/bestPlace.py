@@ -26,13 +26,13 @@ class helperFunctions():
 
 class location():
     requests_cache.install_cache('api_cache', backend='sqlite', expire_after=72000)
-    def __init__(self,address,state,type,zip,filename_other_places_of_importance,filename_commuting_stations):
+    def __init__(self,location_dict,filename_other_places_of_importance,filename_commuting_stations):
         """
         """
-        self.address = address
-        self.state = state
-        self.type = type
-        self.zip= zip
+        self.address = location_dict['address']
+        self.state = location_dict['state']
+        self.type = location_dict['locationType']
+        self.zip= location_dict['zip']
         self.station_distance = []
         self.distances = []
         self.transit_distance = []

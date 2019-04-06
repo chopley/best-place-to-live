@@ -10,10 +10,11 @@ class LocationTest_Katonah(TestCase):
     def setUp(self):
         helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
-        self.loc = location(location_addresses['address'][0],
-                            location_addresses['state'][0],
-                            location_addresses['locationType'][0],
-                            location_addresses['zip'][0],
+        house_data = {'address':location_addresses['address'][0],
+                      'state':location_addresses['state'][0],
+                      'locationType':location_addresses['locationType'][0],
+                      'zip':location_addresses['zip'][0]}
+        self.loc = location(house_data,
                             './tests/test_data_places_of_importance.csv',
                             './tests/test_data_commuting_stations.csv')
  
@@ -100,12 +101,15 @@ class LocationTest_Stamford(TestCase):
     def setUp(self):  
         helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
-        self.loc = location(location_addresses['address'][1],
-                    location_addresses['state'][1],
-                    location_addresses['locationType'][1],
-                    location_addresses['zip'][1],
-                    './tests/test_data_places_of_importance.csv',
-                    './tests/test_data_commuting_stations.csv')         
+        
+        house_data = {'address':location_addresses['address'][1],
+                      'state':location_addresses['state'][1],
+                      'locationType':location_addresses['locationType'][1],
+                      'zip':location_addresses['zip'][1]}
+        self.loc = location(house_data,
+                            './tests/test_data_places_of_importance.csv',
+                            './tests/test_data_commuting_stations.csv')
+               
 
     def test_update_distances_to_places_of_importance(self):
         distances = self.loc.update_distances_to_places_of_importance('./tests/test_data_places_of_importance.csv','driving')
