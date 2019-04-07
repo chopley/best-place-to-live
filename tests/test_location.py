@@ -1,14 +1,14 @@
 from unittest import TestCase
-from bestPlace.bestPlace import location
-from bestPlace.bestPlace import helperFunctions
 import datetime
+
+from bestPlace.bestPlace import location
+import bestPlace.helper as helper
 
  
 
 
 class LocationTest_Katonah(TestCase):
     def setUp(self):
-        helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
         house_data = {'address':location_addresses['address'][0],
                       'state':location_addresses['state'][0],
@@ -86,20 +86,17 @@ class LocationTest_Katonah(TestCase):
 
 
 class HelperTest(TestCase):
-    def setUp(self):
-        self.helper = helperFunctions()
 
     def test_switch_lat_long(self):
         a = [(1,2),(3,4)]
         b = [(2,1),(4,3)]
-        c = self.helper.switch_lat_long(a)
+        c = helper.switch_lat_long(a)
         self.assertEqual(c,b)
 
         
 
 class LocationTest_Stamford(TestCase):
     def setUp(self):  
-        helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
         
         house_data = {'address':location_addresses['address'][1],

@@ -12,17 +12,6 @@ import requests_cache
 import csv
 import polyline
 
-class helperFunctions():
-        
-    def read_address_csv(self,fileName):
-        houses = pd.read_csv(fileName,delimiter=';')
-        return(houses)
-    
-    def switch_lat_long(self,list_of_coords):
-        return_list_of_coords = []
-        for coord in list_of_coords:
-           return_list_of_coords.append((coord[1],coord[0]))
-        return(return_list_of_coords)
 
 class location():
     requests_cache.install_cache('api_cache', backend='sqlite', expire_after=72000)
@@ -65,8 +54,8 @@ class location():
         self.df_travel_distances = self.df_station_distance.merge(pd.DataFrame(self.transit_distance[0]),left_on = 'station_location',right_on = 'station_location')
         self.df_travel_distances['total_duration'] = self.df_travel_distances['duration_x'] + self.df_travel_distances['duration_y']
         self.df_travel_distances = self.df_travel_distances[['distance_x','duration_x','station_name_x','transportMode_x','transportType_x','destination','total_duration']].sort_values('total_duration')
-        self.df_travel_aggregate = self.df_travel_distances.groupby(['destination','duration_x','transportMode_x']).agg({'total_duration':['min','max'],
-                                                                                                         'duration_x':['min','max']
+        self.df_travel_aggregate = self.df_travel_distances.groupby(['destination','duration_x','transportMode_x','station_name_x']).agg({'total_duration':['mean'],
+                                                                                                         'duration_x':['mean']
                                                                                                         })
         self.decode_polylines()
         self.df_places_of_importance = pd.DataFrame(self.distances[0])
