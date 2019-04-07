@@ -1,4 +1,7 @@
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Polygon
+
 
 def read_address_csv(fileName):
     houses = pd.read_csv(fileName,delimiter=';')
@@ -28,3 +31,14 @@ def product_output_df(house):
     dict_val.columns = ['field','values']
     travel_df = travel_df.append(dict_val)
     return(travel_df)
+
+def append_geo_polygons(house,geo_df,agg_df):
+    for district in house.school_district_polylines:
+        geojson = Polygon(switch_lat_long(district))
+        crs = {'init': 'epsg:4326'}
+        polygon_df = gpd.GeoDataFrame(index=[0], crs=crs, geometry=[geojson]) 
+        polygon_df['school_ranking'] = agg_df[agg_df['field']=='school_ranking']['values'].values[0]
+        polygon_df['districtID'] = agg_df[agg_df['field']=='districtID']['values'].values[0]
+        polygon_df['districtName'] = agg_df[agg_df['field']=='districtName']['values'].values[0]
+        geo_df = geo_df.append(polygon_df)
+    return(geo_df)

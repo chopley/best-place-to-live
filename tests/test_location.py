@@ -1,5 +1,6 @@
 from unittest import TestCase
 import datetime
+import geopandas as gpd
 
 from bestPlace.bestPlace import location
 import bestPlace.helper as helper
@@ -101,6 +102,18 @@ class HelperTest(TestCase):
         df = helper.product_output_df(house)
         test_dict = {'field': {0: 'districtID', 1: 'districtName', 2: 'school_ranking'}, 'values': {0: '3616080', 1: 'Katonah-Lewisboro Union Free School District', 2: 95.0}}
         self.assertEqual(df.to_dict(),test_dict)
+        
+    def test_append_geo_polygons(self):
+        house_data = {'address': '7 Orchard Ln, Katonah', 'state': 'NY', 'locationType': 'house', 'zip': 10536}
+        places_of_importance = './tests/test_data_places_of_importance.csv'
+        commuting_locations = './tests/test_data_commuting_stations.csv'
+        house = location(house_data,places_of_importance,commuting_locations)
+        agg_df = helper.product_output_df(house)
+        geo_df = gpd.GeoDataFrame()
+        geo_df = helper.append_geo_polygons(house,geo_df,agg_df)
+        self.assertEqual(geo_df['districtID'].values[0],'3616080')
+
+        
         
 
         
