@@ -92,6 +92,16 @@ class HelperTest(TestCase):
         b = [(2,1),(4,3)]
         c = helper.switch_lat_long(a)
         self.assertEqual(c,b)
+    
+    def test_product_output_df(self):
+        house_data = {'address': '7 Orchard Ln, Katonah', 'state': 'NY', 'locationType': 'house', 'zip': 10536}
+        places_of_importance = './tests/test_data_places_of_importance.csv'
+        commuting_locations = './tests/test_data_commuting_stations.csv'
+        house = location(house_data,places_of_importance,commuting_locations)
+        df = helper.product_output_df(house)
+        test_dict = {'field': {0: 'districtID', 1: 'districtName', 2: 'school_ranking'}, 'values': {0: '3616080', 1: 'Katonah-Lewisboro Union Free School District', 2: 95.0}}
+        self.assertEqual(df.to_dict(),test_dict)
+        
 
         
 
