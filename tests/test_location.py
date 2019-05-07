@@ -1,14 +1,15 @@
 from unittest import TestCase
-from bestPlace.bestPlace import location
-from bestPlace.bestPlace import helperFunctions
 import datetime
+import geopandas as gpd
+
+from bestPlace.bestPlace import location
+import bestPlace.helper as helper
 
  
 
 
 class LocationTest_Katonah(TestCase):
     def setUp(self):
-        helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
         house_data = {'address':location_addresses['address'][0],
                       'state':location_addresses['state'][0],
@@ -86,20 +87,46 @@ class LocationTest_Katonah(TestCase):
 
 
 class HelperTest(TestCase):
-    def setUp(self):
-        self.helper = helperFunctions()
 
     def test_switch_lat_long(self):
         a = [(1,2),(3,4)]
         b = [(2,1),(4,3)]
-        c = self.helper.switch_lat_long(a)
+        c = helper.switch_lat_long(a)
         self.assertEqual(c,b)
+    
+    def test_product_output_df(self):
+        house_data = {'address': '7 Orchard Ln, Katonah', 'state': 'NY', 'locationType': 'house', 'zip': 10536}
+        places_of_importance = './tests/test_data_places_of_importance.csv'
+        commuting_locations = './tests/test_data_commuting_stations.csv'
+        house = location(house_data,places_of_importance,commuting_locations)
+        df = helper.product_output_df(house)
+        test_dict = {'field': {0: 'districtID', 1: 'districtName', 2: 'school_ranking'}, 'values': {0: '3616080', 1: 'Katonah-Lewisboro Union Free School District', 2: 95.0}}
+        self.assertEqual(df.to_dict(),test_dict)
+        
+    def test_append_geo_polygons(self):
+        house_data = {'address': '7 Orchard Ln, Katonah', 'state': 'NY', 'locationType': 'house', 'zip': 10536}
+        house_data2 = {'address': '6 Applegate Way, Ossining', 'state': 'NY', 'locationType': 'house', 'zip': 10562}
+        places_of_importance = './tests/test_data_places_of_importance.csv'
+        commuting_locations = './tests/test_data_commuting_stations.csv'
+        house = location(house_data,places_of_importance,commuting_locations)
+        house_2 = location(house_data2,places_of_importance,commuting_locations)
+        agg_df = helper.product_output_df(house)
+        agg_df_2 = helper.product_output_df(house_2)
+        geo_df = gpd.GeoDataFrame()
+        geo_df = helper.append_geo_polygons(house,geo_df,agg_df)
+        self.assertEqual(len(geo_df.iloc[0,:]),4)
+        self.assertEqual(geo_df['districtID'].values[0],'3616080')
+        geo_df = helper.append_geo_polygons(house_2,geo_df,agg_df_2)
+        self.assertEqual(len(geo_df.iloc[1,:]),4)
+        self.assertEqual(geo_df['districtID'].values[1],'3622020')
+            
+        
+        
 
         
 
 class LocationTest_Stamford(TestCase):
     def setUp(self):  
-        helper = helperFunctions()
         location_addresses = helper.read_address_csv('./tests/test_data_houses.csv')
         
         house_data = {'address':location_addresses['address'][1],
@@ -147,7 +174,7 @@ class LocationTest_Stamford(TestCase):
         distance = self.loc.distance_to_public_transport(self.loc.address,transportType,mode,nOpts)
         expected_response = {'house_location': (41.1158569, -73.5259389), 
                              'station_location': (41.116012, -73.498149), 
-                             'distance': '3.0 mi', 
+                             'distance': '2.6 mi', 
                              'duration': 7,
                              'station_name' : 'Talmadge Hill',
                              'transportMode': 'driving',
