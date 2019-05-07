@@ -101,7 +101,7 @@ class location():
         directions = self.gmaps.directions((gps_dict_start['lat'],gps_dict_start['lng']),
                  (gps_dict_destination['lat'],gps_dict_destination['lng']),
                  mode=transportMode,
-                 departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+                 departure_time=datetime.datetime(2019, 4, 30, 7, 0))
         directions = self.convert_directions_to_distance_duration(directions)
         mode = {'transportMode' : transportMode, 'destination' : destination_address ,'destination_location' : (gps_dict_destination['lat'],gps_dict_destination['lng']) }
         directions.update(mode)
@@ -130,7 +130,7 @@ class location():
         directions = self.gmaps.directions(start_station_location,
                  (gps_dict_destination['lat'],gps_dict_destination['lng']),
                  mode=transportMode,
-                 departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+                 departure_time=datetime.datetime(2019, 4, 30, 7, 0))
         directions = self.convert_directions_to_distance_duration(directions)
         mode = {'transportMode' : transportMode, 'destination' : destination_station_address ,'destination_location' : (gps_dict_destination['lat'],gps_dict_destination['lng']) }
         directions.update(mode)
@@ -154,7 +154,7 @@ class location():
             directions = self.gmaps.directions((gps_dict['lat'],gps_dict['lng']),
                              (station['geometry']['location']['lat'],station['geometry']['location']['lng']),
                              mode=mode,
-                             departure_time=datetime.datetime(2019, 4, 28, 7, 0))
+                             departure_time=datetime.datetime(2019, 4, 30, 7, 0))
             distance = (directions[0]['legs'][0]['distance']['text'])
             duration = (directions[0]['legs'][0]['duration']['text'])
             distance = {"house_location" : (gps_dict['lat'],gps_dict['lng']),
